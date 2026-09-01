@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OpenAINotOpenPocket. — 贩卖宁静，不动钱包</title>
+<meta name="description" content="一家反商业情绪杂货铺。所有商品定价 $0.00。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23000'/%3E%3C/svg%3E" />
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['-apple-system','BlinkMacSystemFont','Segoe UI','Helvetica Neue','PingFang SC','Hiragino Sans GB','Microsoft YaHei UI','Microsoft YaHei','Noto Sans SC','sans-serif'],
+          mono: ['SF Mono','SFMono-Regular','ui-monospace','Consolas','Menlo','monospace'],
+          serif: ['Georgia','Times New Roman','Songti SC','SimSun','serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { background:#fff; }
+  body {
+    background:#fff; color:#0a0a0a;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue','PingFang SC','Hiragino Sans GB','Microsoft YaHei UI','Microsoft YaHei','Noto Sans SC',sans-serif;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  ::selection { background:#0a0a0a; color:#fff; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-thumb { background:#d4d4d4; border-radius:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+
+  /* ---------- 动画：缓慢、丝滑、带呼吸感 ---------- */
+  @keyframes fadeUp    { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+  @keyframes growLine  { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+  @keyframes breathe   { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.1);opacity:.9} }
+  @keyframes msgCycle  {
+    0%   {opacity:0;transform:translateY(14px);filter:blur(8px)}
+    30%  {opacity:1;transform:translateY(0);filter:blur(0)}
+    82%  {opacity:1;filter:blur(0)}
+    100% {opacity:0;transform:translateY(-8px);filter:blur(8px)}
+  }
+  @keyframes msgIn     { from{opacity:0;transform:translateY(14px);filter:blur(8px)} to{opacity:1;transform:translateY(0);filter:blur(0)} }
+  @keyframes printOut  { from{clip-path:inset(0 0 100% 0)} to{clip-path:inset(0 0 0 0)} }
+  @keyframes popIn     { 0%{transform:scale(0)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+  @keyframes floatUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .anim-fade-up  { animation:fadeUp 1.1s cubic-bezier(.22,1,.36,1) both; }
+  .anim-fade     { animation:fadeIn 1.4s ease both; }
+  .anim-line     { animation:growLine 1.6s cubic-bezier(.22,1,.36,1) .8s both; transform-origin:center; }
+  .anim-breathe  { animation:breathe 3.6s ease-in-out infinite; }
+  .anim-msg      { animation:msgCycle 1.5s cubic-bezier(.4,0,.2,1) both; }
+  .anim-msg-final{ animation:msgIn 1s cubic-bezier(.22,1,.36,1) both; }
+  .anim-print    { animation:printOut 1.9s cubic-bezier(.22,1,.36,1) both; }
+  .anim-pop      { animation:popIn .45s cubic-bezier(.22,1,.36,1) both; }
+  .anim-float    { animation:floatUp 1.2s cubic-bezier(.22,1,.36,1) both; }
+
+  /* ---------- 小票锯齿撕边 ---------- */
+  .zz-top    { height:9px; background:conic-gradient(from 135deg at 50% 0%, #fff 90deg, transparent 0) 0 0 / 12px 9px repeat-x; }
+  .zz-bottom { height:9px; background:conic-gradient(from -45deg at 50% 100%, #fff 90deg, transparent 0) 0 0 / 12px 9px repeat-x; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+/* ================= 静态数据 ================= */
+
+const CHECKOUT_STEPS = [
+  "正在清点您的购物车...",
+  "正在打包您的宁静...",
+  "隔绝外界焦虑...",
+  "支付成功",
+];
+
+const GlyphSilence = () => (
+  <svg viewBox="0 0 64 64" className="w-16 h-16" fill="none" stroke="currentColor" strokeWidth="0.7">
+    <circle cx="32" cy="32" r="24" strokeDasharray="1 5" strokeLinecap="round" className="opacity-40" />
+    <circle cx="32" cy="32" r="15" className="opacity-60" />
+    <circle cx="32" cy="32" r="3" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+const GlyphMoon = () => (
+  <svg viewBox="0 0 24 24" className="w-16 h-16" fill="none" stroke="currentColor" strokeWidth="0.7" strokeLinejoin="round" strokeLinecap="round">
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" className="opacity-80" />
+    <path d="M17.5 3.2l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55z" fill="currentColor" stroke="none" className="opacity-70" />
+    <circle cx="20" cy="11.5" r="0.5" fill="currentColor" stroke="none" className="opacity-60" />
+  </svg>
+);
+
+const GlyphHeart = () => (
+  <svg viewBox="0 0 24 24" className="w-16 h-16" fill="none" stroke="currentColor" strokeWidth="0.7" strokeLinejoin="round" strokeLinecap="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
+    <circle cx="4.2" cy="4.6" r="0.55" fill="currentColor" stroke="none" className="opacity-50" />
+    <circle cx="20.4" cy="4" r="0.55" fill="currentColor" stroke="none" className="opacity-50" />
+    <circle cx="12" cy="2.4" r="0.55" fill="currentColor" stroke="none" className="opacity-50" />
+  </svg>
+);
+
+const PRODUCTS = [
+  {
+    id: 1,
+    no: "01",
+    glyph: <GlyphSilence />,
+    name: "深夜11点的10分钟绝对安静",
+    en: "ABSOLUTE SILENCE",
+    desc: "隔绝现实的喧嚣与工作群的弹窗。此刻世界属于你。",
+  },
+  {
+    id: 2,
+    no: "02",
+    glyph: <GlyphMoon />,
+    name: "小怪兽熟睡后的天使滤镜",
+    en: "ANGEL FILTER",
+    desc: "提取最柔软的记忆。原谅今天所有的兵荒马乱。",
+  },
+  {
+    id: 3,
+    no: "03",
+    glyph: <GlyphHeart />,
+    name: "毫无逻辑的偏爱与肯定",
+    en: "BLIND AFFECTION",
+    desc: "你今天已经做得很好了，无需向任何人证明什么。",
+  },
+];
+
+const BagIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5.5 8h13l-1.2 12.5H6.7L5.5 8Z" />
+    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+  </svg>
+);
+
+/* 伪造条形码：确定性伪随机，黑条宽窄不一 */
+function Barcode({ seed = 7 }) {
+  let s = seed;
+  const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const bars = Array.from({ length: 46 }, () => 1 + Math.floor(rnd() * 3));
+  return (
+    <div className="flex items-stretch justify-center" style={{ gap: "2px", height: "44px" }}>
+      {bars.map((w, i) => (
+        <div key={i} className="bg-neutral-900" style={{ width: w + "px" }} />
+      ))}
+    </div>
+  );
+}
+
+/* ================= 极微音效（Web Audio 现场合成，零外部文件） ================= */
+
+let audioCtx = null;
+
+/* 浏览器自动播放策略：音频上下文必须在用户点击时唤醒 */
+function ensureAudio() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!audioCtx) {
+    try { audioCtx = new AC(); } catch (e) { return null; }
+  }
+  if (audioCtx.state === "suspended") Promise.resolve(audioCtx.resume()).catch(() => {});
+  return audioCtx;
+}
+
+/* 老式打印机出纸的「沙沙」：带通噪声 + 频率抖动，贴合 1.9s 出票动画 */
+function playPaperFeed() {
+  const ctx = ensureAudio();
+  if (!ctx || ctx.state !== "running") return;
+  const dur = 1.8;
+  const t = ctx.currentTime;
+  const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = 2200;
+  bp.Q.value = 0.7;
+  const lfo = ctx.createOscillator();
+  lfo.frequency.value = 11;
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = 500;
+  lfo.connect(lfoGain).connect(bp.frequency);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.03, t + 0.12);
+  g.gain.setValueAtTime(0.03, t + dur - 0.45);
+  g.gain.linearRampToValueAtTime(0, t + dur);
+  src.connect(bp);
+  bp.connect(g);
+  g.connect(ctx.destination);
+  src.start(t);
+  src.stop(t + dur);
+  lfo.start(t);
+  lfo.stop(t + dur);
+}
+
+/* 收银铃「叮」：非谐分音，快攻击慢衰减，音量极弱 */
+function playDing() {
+  const ctx = ensureAudio();
+  if (!ctx || ctx.state !== "running") return;
+  const t = ctx.currentTime;
+  [[1244, 0.045, 1.6], [3111, 0.02, 0.9], [4662, 0.01, 0.5]].forEach(([f, vol, dur]) => {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vol, t + 0.004);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(env).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  });
+}
+
+/* ================= 页面模块 ================= */
+
+function Header({ count, onCart }) {
+  return (
+    <header className="fixed top-0 inset-x-0 z-30 bg-white/85 backdrop-blur-md border-b border-neutral-200/70">
+      <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
+        <span className="text-[13px] tracking-[0.22em] font-medium text-neutral-900 select-none">
+          OpenAINotOpenPocket<span className="text-neutral-400">.</span>
+        </span>
+        <button
+          data-testid="cart-btn"
+          aria-label="购物车"
+          onClick={onCart}
+          className="relative p-2 -m-2 text-neutral-800 hover:text-black transition-colors duration-500"
+        >
+          <BagIcon />
+          {count > 0 && (
+            <span
+              key={count}
+              className="anim-pop absolute top-0 right-0 min-w-[17px] h-[17px] px-1 rounded-full bg-neutral-900 text-white text-[10px] font-mono flex items-center justify-center"
+            >
+              {count}
+            </span>
+          )}
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="pt-40 pb-24 md:pt-52 md:pb-32 px-8 text-center">
+      <p className="anim-fade-up text-[10px] md:text-[11px] font-mono tracking-[0.55em] text-neutral-400" style={{ animationDelay: "100ms" }}>
+        EMOTIONAL GROCERY · EST. 2026
+      </p>
+      <h1 className="anim-fade-up mt-8 font-extralight text-4xl md:text-6xl lg:text-7xl leading-tight tracking-wide" style={{ animationDelay: "250ms" }}>
+        贩卖宁静，<br />不动钱包。
+      </h1>
+      <p className="anim-fade-up mt-10 text-sm md:text-[15px] font-light text-neutral-500 leading-loose max-w-md mx-auto" style={{ animationDelay: "450ms" }}>
+        掏空钱包这件事，别人家已经做得足够好了。<br />
+        这里不制造焦虑，不兜售欲望。所有体验，一律 <span className="text-neutral-900 font-normal">$0.00</span>。
+      </p>
+      <div className="anim-fade-up mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-mono tracking-[0.3em] text-neutral-400" style={{ animationDelay: "600ms" }}>
+        <span>FREE SHIPPING</span>
+        <span className="text-neutral-300">·</span>
+        <span>NO ADS</span>
+        <span className="text-neutral-300">·</span>
+        <span className="anim-breathe inline-block" style={{ animationDuration: "4s" }}>$0.00 FOREVER</span>
+      </div>
+      <div className="anim-line mt-16 md:mt-24 mx-auto bg-neutral-200" style={{ height: "1px", width: "min(560px, 80%)" }} />
+    </section>
+  );
+}
+
+function ProductCard({ p, i, onAdd, added }) {
+  const isAdded = added === p.id;
+  return (
+    <article
+      className="anim-fade-up group flex flex-col border border-neutral-200/80 hover:border-neutral-900 p-8 md:p-10 transition-all duration-700 hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.12)]"
+      style={{ animationDelay: (350 + i * 160) + "ms" }}
+    >
+      <div className="flex items-start justify-between">
+        <span className="font-mono text-[11px] text-neutral-300">{p.no}</span>
+        <span className="font-mono text-[9px] tracking-[0.25em] text-neutral-400">{p.en}</span>
+      </div>
+
+      <div className="mt-10 mb-12 flex justify-center text-neutral-300 group-hover:text-neutral-900 transition-colors duration-700">
+        <div className="anim-breathe" style={{ animationDelay: (i * 700) + "ms" }}>{p.glyph}</div>
+      </div>
+
+      <h3 className="text-lg font-light tracking-wide text-neutral-900 leading-relaxed">{p.name}</h3>
+      <p className="mt-3 text-[13px] font-light text-neutral-400 leading-loose">{p.desc}</p>
+
+      <div className="mt-8 pt-6 border-t border-neutral-100 flex items-baseline justify-between">
+        <span className="text-[10px] font-mono tracking-[0.3em] text-neutral-400">PRICE</span>
+        <span className="text-xl font-extralight">$0.00</span>
+      </div>
+
+      <button
+        data-testid={"add-btn-" + p.id}
+        onClick={() => onAdd(p.id)}
+        className={
+          "mt-6 py-3.5 text-[11px] tracking-[0.35em] border transition-all duration-500 " +
+          (isAdded
+            ? "bg-neutral-900 text-white border-neutral-900"
+            : "border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white")
+        }
+      >
+        {isAdded ? "已收下 · THANK YOU" : "加入购物车 · ADD"}
+      </button>
+    </article>
+  );
+}
+
+function ProductGrid({ onAdd, added }) {
+  return (
+    <section className="max-w-6xl mx-auto px-8 pb-32 md:pb-44">
+      <div className="anim-fade-up flex items-baseline justify-between pb-8" style={{ animationDelay: "250ms" }}>
+        <h2 className="text-sm font-light tracking-[0.3em] text-neutral-900">
+          今日贩售
+          <span className="ml-3 font-mono text-[10px] tracking-[0.3em] text-neutral-300">NOW SELLING</span>
+        </h2>
+        <span className="font-mono text-[10px] tracking-[0.25em] text-neutral-400 hidden sm:block">共 3 件 · 库存：此刻</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {PRODUCTS.map((p, i) => (
+          <ProductCard key={p.id} p={p} i={i} onAdd={onAdd} added={added} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-neutral-100 py-16 px-8 text-center">
+      <p className="anim-fade text-[13px] tracking-[0.2em] font-light text-neutral-900">
+        OpenAINotOpenPocket<span className="text-neutral-400">.</span>
+      </p>
+      <p className="anim-fade mt-5 text-[11px] font-light text-neutral-400 tracking-wider" style={{ animationDelay: "150ms" }}>
+        世界很喧嚣，所幸宁静无价。
+      </p>
+      <div className="anim-fade mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-mono tracking-[0.25em] text-neutral-400" style={{ animationDelay: "300ms" }}>
+        <span>配送 · 情绪即时送达</span>
+        <span className="text-neutral-300">/</span>
+        <span>售后 · 概不退换</span>
+        <span className="text-neutral-300">/</span>
+        <span>© 2026</span>
+      </div>
+    </footer>
+  );
+}
+
+/* ================= 购物车侧边栏 ================= */
+
+function CartSidebar({ open, items, count, onClose, onInc, onDec, onCheckout }) {
+  return (
+    <React.Fragment>
+      <div
+        onClick={onClose}
+        className={"fixed inset-0 z-40 transition-opacity duration-700 " + (open ? "opacity-100" : "opacity-0 pointer-events-none")}
+        style={{ background: "rgba(10,10,10,0.28)", backdropFilter: "blur(3px)" }}
+      />
+      <aside
+        data-testid="cart-panel"
+        className={
+          "fixed top-0 right-0 z-50 h-full w-full sm:w-[430px] bg-white flex flex-col transition-transform duration-700 " +
+          (open ? "translate-x-0" : "translate-x-full")
+        }
+        style={{ transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+      >
+        <div className="flex items-center justify-between px-8 h-20 border-b border-neutral-100 shrink-0">
+          <div>
+            <span className="text-sm font-light tracking-[0.3em]">购物车</span>
+            <span className="ml-3 font-mono text-[10px] tracking-[0.3em] text-neutral-400">CART ({count})</span>
+          </div>
+          <button
+            data-testid="cart-close"
+            onClick={onClose}
+            aria-label="关闭"
+            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-colors duration-500"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="1"><path d="M1 1l12 12M13 1L1 13" /></svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-8">
+          {items.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center anim-fade">
+              <div className="text-neutral-200"><BagIcon size={56} /></div>
+              <p className="mt-8 text-sm font-light text-neutral-500">空空如也。</p>
+              <p className="mt-2 text-[12px] font-light text-neutral-400">您的焦虑，暂未结账。</p>
+            </div>
+          ) : (
+            <ul>
+              {items.map((it) => (
+                <li key={it.id} className="py-8 border-b border-neutral-100 anim-fade">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h4 className="text-[15px] font-light text-neutral-900 leading-relaxed">{it.name}</h4>
+                    <span className="font-mono text-sm font-light text-neutral-900 shrink-0">$0.00</span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <button onClick={() => onDec(it.id)} aria-label="减少数量" className="w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-colors duration-300 text-sm">−</button>
+                      <span className="font-mono text-xs text-neutral-900 w-4 text-center">{it.qty}</span>
+                      <button onClick={() => onInc(it.id)} aria-label="增加数量" className="w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-900 transition-colors duration-300 text-sm">+</button>
+                    </div>
+                    <span className="font-mono text-[9px] tracking-[0.25em] text-neutral-300">{it.en}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="px-8 py-7 border-t border-neutral-100 shrink-0">
+          <div className="flex items-baseline justify-between mb-5">
+            <span className="text-[11px] font-mono tracking-[0.3em] text-neutral-400">合计 TOTAL</span>
+            <span className="text-2xl font-extralight">$0.00</span>
+          </div>
+          <button
+            data-testid="checkout-btn"
+            onClick={onCheckout}
+            disabled={count === 0}
+            className="w-full py-4 bg-neutral-900 text-white text-[11px] tracking-[0.4em] hover:bg-black transition-all duration-500 disabled:opacity-25 disabled:cursor-not-allowed"
+          >
+            去结算 · CHECKOUT
+          </button>
+          <p className="mt-4 text-center text-[10px] font-light text-neutral-400 tracking-wider">本店仅支持「宁静」支付</p>
+        </div>
+      </aside>
+    </React.Fragment>
+  );
+}
+
+/* ================= 结账过渡动画 ================= */
+
+function CheckoutOverlay({ step }) {
+  const last = step === CHECKOUT_STEPS.length - 1;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center anim-fade"
+      style={{ background: "radial-gradient(circle at 50% 42%, #171717 0%, #0a0a0a 72%)" }}
+    >
+      <div className="w-14 h-14 rounded-full border border-white/25 anim-breathe" />
+      <div className="h-12 md:h-14 mt-14 flex items-center">
+        <p
+          key={step}
+          className={
+            last
+              ? "anim-msg-final text-xl md:text-3xl font-extralight text-neutral-100 tracking-[0.3em]"
+              : "anim-msg text-lg md:text-2xl font-extralight text-neutral-300 tracking-[0.25em]"
+          }
+        >
+          {CHECKOUT_STEPS[step]}
+        </p>
+      </div>
+      <div className="mt-10 flex items-center gap-4 font-mono text-[10px] tracking-[0.4em] text-neutral-600">
+        <span>OPENAINOTOPENPOCKET</span>
+        <span className="text-neutral-800">|</span>
+        <span>TOTAL $0.00</span>
+      </div>
+      {last && (
+        <p className="anim-fade mt-6 font-mono text-[10px] tracking-[0.35em] text-neutral-500" style={{ animationDelay: "500ms" }}>
+          PAID WITH YOUR CALM · 收款 $0.00
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ================= 赛博电子小票 ================= */
+
+function Receipt({ items, count, orderNo, onReset }) {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const dateStr = d.getFullYear() + "." + pad(d.getMonth() + 1) + "." + pad(d.getDate());
+  const timeStr = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  const D = <div className="border-t border-dashed border-neutral-300 my-4" />;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: "radial-gradient(circle at 50% 18%, #f6f6f4 0%, #e7e7e4 75%)" }}>
+      <div className="min-h-full flex flex-col items-center justify-center py-14 px-4">
+        <p className="anim-fade font-mono text-[10px] tracking-[0.5em] text-neutral-400 mb-8">YOUR RECEIPT · 请惠存</p>
+
+        <div className="w-full flex flex-col items-center" style={{ filter: "drop-shadow(0 30px 45px rgba(0,0,0,0.16))" }}>
+          {/* 打印机出票口 */}
+          <div className="w-64 h-2.5 bg-neutral-800 rounded-full relative z-10" style={{ boxShadow: "0 3px 8px rgba(0,0,0,0.3)" }} />
+
+          <div data-testid="receipt" className="anim-print w-[340px] max-w-full bg-white">
+            <div className="zz-top" />
+            <div className="px-7 pt-8 pb-7 font-mono text-neutral-900">
+              <Barcode seed={17} />
+              <p className="text-center text-[10px] tracking-[0.35em] text-neutral-500 mt-2">0 7240 1963 {orderNo}</p>
+
+              <div className="mt-7 text-center">
+                <p className="text-[15px] tracking-[0.2em] font-semibold">OpenAINotOpenPocket</p>
+                <p className="text-[9px] tracking-[0.6em] text-neutral-500 mt-1.5">R E C E I P T</p>
+              </div>
+
+              {D}
+              <div className="text-[10.5px] leading-[2.1] text-neutral-600">
+                <div className="flex justify-between"><span>订单时间</span><span className="text-neutral-900">{dateStr} {timeStr}</span></div>
+                <div className="flex justify-between"><span>订单编号</span><span className="text-neutral-900">No. {orderNo}</span></div>
+                <div className="flex justify-between"><span>收银员</span><span className="text-neutral-900">今晚的月亮</span></div>
+              </div>
+              {D}
+
+              <div className="text-[11px] leading-[2.4]">
+                {items.map((it) => (
+                  <div key={it.id} className="flex justify-between items-baseline gap-3">
+                    <span className="text-neutral-900">
+                      {it.name}<span className="text-neutral-400 ml-2">×{it.qty}</span>
+                    </span>
+                    <span className="shrink-0">$0.00</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-neutral-500 mt-1">
+                  <span>件数 QTY</span><span>{count}</span>
+                </div>
+              </div>
+              {D}
+
+              <div className="flex justify-between items-baseline">
+                <span className="text-[13px] font-bold tracking-[0.2em]">合计 TOTAL</span>
+                <span className="text-lg font-bold">$0.00</span>
+              </div>
+              <div className="text-[10.5px] leading-[2.1] text-neutral-600 mt-2">
+                <div className="flex justify-between"><span>支付方式</span><span className="text-neutral-900">您的宁静 · PAID</span></div>
+                <div className="flex justify-between"><span>找零</span><span className="text-neutral-900">$0.00</span></div>
+              </div>
+              {D}
+
+              <div className="text-center font-serif italic text-[13px] leading-[2.2] text-neutral-700 px-1">
+                世界很喧嚣，<br />
+                但此刻你是宁静的。<br />
+                <span className="text-neutral-500">您的钱包依然满载，一如您的灵魂。</span>
+              </div>
+              {D}
+
+              <Barcode seed={42} />
+              <p className="text-center text-[10px] tracking-[0.4em] text-neutral-500 mt-2">谢谢惠顾 · THANK YOU</p>
+              <p className="text-center text-[9px] tracking-[0.2em] text-neutral-400 mt-2">情绪一经售出 · 概不退换</p>
+            </div>
+            <div className="zz-bottom" />
+          </div>
+        </div>
+
+        <button
+          data-testid="re-shop"
+          onClick={onReset}
+          className="anim-float mt-12 mb-6 px-12 py-3.5 border border-neutral-900 text-neutral-900 text-[11px] tracking-[0.4em] hover:bg-neutral-900 hover:text-white transition-all duration-500"
+          style={{ animationDelay: "2.1s" }}
+        >
+          重新购物 · SHOP AGAIN
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ================= 应用主体 ================= */
+
+function App() {
+  const [phase, setPhase] = useState("shop");   // shop | checkout | receipt
+  const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [step, setStep] = useState(0);
+  const [added, setAdded] = useState(null);
+  const [orderNo] = useState(() => String(Math.floor(10000 + Math.random() * 90000)));
+
+  const count = cart.reduce((a, c) => a + c.qty, 0);
+  const items = cart.map((c) => ({ ...PRODUCTS.find((p) => p.id === c.id), qty: c.qty }));
+
+  useEffect(() => { window.scrollTo(0, 0); }, [phase]);
+
+  useEffect(() => {
+    const lock = cartOpen || phase === "checkout";
+    document.body.style.overflow = lock ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [cartOpen, phase]);
+
+  /* 结账流程：每 1.5s 切换一句话，最后一句停留后出票 */
+  useEffect(() => {
+    if (phase !== "checkout") return;
+    ensureAudio();  /* 最后一次确保上下文唤醒，出票时才能发声 */
+    const isLast = step === CHECKOUT_STEPS.length - 1;
+    const t = setTimeout(
+      () => (isLast ? setPhase("receipt") : setStep((s) => s + 1)),
+      isLast ? 2200 : 1500
+    );
+    return () => clearTimeout(t);
+  }, [phase, step]);
+
+  const addToCart = (id) => {
+    ensureAudio();  /* 用户点击时解锁音频上下文 */
+    setCart((prev) => {
+      const hit = prev.find((c) => c.id === id);
+      return hit
+        ? prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c))
+        : [...prev, { id, qty: 1 }];
+    });
+    setAdded(id);
+    setTimeout(() => setAdded((a) => (a === id ? null : a)), 1300);
+  };
+
+  const inc = (id) => setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c)));
+  const dec = (id) => setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: c.qty - 1 } : c)).filter((c) => c.qty > 0));
+
+  const checkout = () => { ensureAudio(); setCartOpen(false); setStep(0); setPhase("checkout"); };
+
+  useEffect(() => {
+    if (phase !== "receipt") return;
+    playDing();
+    const t = setTimeout(playPaperFeed, 350);  /* 叮之后接出纸沙沙声 */
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  const reset = () => { setCart([]); setStep(0); setPhase("shop"); };
+
+  return (
+    <div className="min-h-screen bg-white text-neutral-900 font-sans">
+      {phase === "shop" && (
+        <React.Fragment>
+          <Header count={count} onCart={() => setCartOpen(true)} />
+          <main>
+            <Hero />
+            <ProductGrid onAdd={addToCart} added={added} />
+          </main>
+          <Footer />
+        </React.Fragment>
+      )}
+
+      {phase === "checkout" && <CheckoutOverlay step={step} />}
+      {phase === "receipt" && <Receipt items={items} count={count} orderNo={orderNo} onReset={reset} />}
+
+      <CartSidebar
+        open={cartOpen && phase === "shop"}
+        items={items}
+        count={count}
+        onClose={() => setCartOpen(false)}
+        onInc={inc}
+        onDec={dec}
+        onCheckout={checkout}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
