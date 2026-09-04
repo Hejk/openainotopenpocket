@@ -5,7 +5,7 @@ export function Header({ count, onCart }) {
     <header className="fixed top-0 inset-x-0 z-30 bg-white/85 backdrop-blur-md border-b border-neutral-200/70">
       <div className="max-w-6xl mx-auto px-8 h-16 flex items-center justify-between">
         <span className="text-[13px] tracking-[0.22em] font-medium text-neutral-900 select-none">
-          OpenAINotOpenPocket<span className="text-neutral-400">.</span>
+          Priceless<sup className="text-[8px] align-super">™</sup><span className="text-neutral-400">.</span>
         </span>
         <button
           data-testid="cart-btn"
@@ -35,14 +35,14 @@ export function Hero() {
         EMOTIONAL LUXURY · EST. 2026
       </p>
       <h1 className="anim-fade-up mt-8 font-extralight text-4xl md:text-6xl lg:text-7xl leading-tight tracking-wide" style={{ animationDelay: '250ms' }}>
-        贩卖世间最昂贵<br />的奢侈品。
+        情绪，<br />现已上架。
       </h1>
       <p className="anim-fade-up mt-10 text-sm md:text-[15px] font-light text-neutral-500 leading-loose max-w-md mx-auto" style={{ animationDelay: '450ms' }}>
-        宁静、柔软、无条件的偏爱。<br />
-        世上最稀缺的三样东西，这里明码标价。
+        纯粹的宁静。无条件的偏爱。<br />
+        100% 灵魂提取。
       </p>
       <div className="anim-fade-up mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-mono tracking-[0.3em] text-neutral-400" style={{ animationDelay: '600ms' }}>
-        <span>PRICES UPON REQUEST</span>
+        <span>EMOTIONS IN STOCK</span>
         <span className="text-neutral-300">·</span>
         <span>NO ADS</span>
         <span className="text-neutral-300">·</span>
@@ -116,7 +116,7 @@ export function Footer() {
   return (
     <footer className="border-t border-neutral-100 py-16 px-8 text-center">
       <p className="anim-fade text-[13px] tracking-[0.2em] font-light text-neutral-900">
-        OpenAINotOpenPocket<span className="text-neutral-400">.</span>
+        Priceless<sup className="text-[8px] align-super">™</sup><span className="text-neutral-400">.</span>
       </p>
       <p className="anim-fade mt-5 text-[11px] font-light text-neutral-400 tracking-wider" style={{ animationDelay: '150ms' }}>
         世界很喧嚣，所幸宁静无价。

@@ -1,7 +1,7 @@
 import Barcode from './Barcode.jsx';
 import { PawStamp } from './data.jsx';
 
-export default function Receipt({ items, count, total, orderNo, onReset }) {
+export default function Receipt({ items, count, total, orderNo, note, onReset }) {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const dateStr = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
@@ -24,7 +24,7 @@ export default function Receipt({ items, count, total, orderNo, onReset }) {
               <p className="text-center text-[10px] tracking-[0.35em] text-neutral-500 mt-2">0 7240 1963 {orderNo}</p>
 
               <div className="mt-7 text-center">
-                <p className="text-[15px] tracking-[0.2em] font-semibold">OpenAINotOpenPocket</p>
+                <p className="text-[15px] tracking-[0.2em] font-semibold">Priceless™</p>
                 <p className="text-[9px] tracking-[0.6em] text-neutral-500 mt-1.5">R E C E I P T</p>
               </div>
 
@@ -78,9 +78,9 @@ export default function Receipt({ items, count, total, orderNo, onReset }) {
                 >
                   <PawStamp size={64} />
                 </div>
-                {/* 店长手写批注：从爪印下方浮现 */}
+                {/* 店长盲盒便签：每次结账随机一句，从爪印下方浮现 */}
                 <p className="anim-note mt-1 text-right font-serif italic text-[11.5px] text-[#a63d2f] opacity-80" style={{ animationDelay: '1.9s' }}>
-                  喵，今天辛苦啦，算我账上！
+                  {note}
                 </p>
               </div>
               {D}

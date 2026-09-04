@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { PRODUCTS, CHECKOUT_STEPS } from './data.jsx';
+import { PRODUCTS, CHECKOUT_STEPS, CAT_NOTES } from './data.jsx';
 import { Header, Hero, ProductGrid, Footer } from './components.jsx';
 import CartSidebar from './CartSidebar.jsx';
 import CheckoutOverlay from './CheckoutOverlay.jsx';
@@ -14,6 +14,7 @@ export default function App() {
   const [step, setStep] = useState(0);
   const [added, setAdded] = useState(null);
   const [orderNo] = useState(() => String(Math.floor(10000 + Math.random() * 90000)));
+  const [note, setNote] = useState(() => CAT_NOTES[Math.floor(Math.random() * CAT_NOTES.length)]);
 
   const count = cart.reduce((a, c) => a + c.qty, 0);
   const items = cart.map((c) => ({ ...PRODUCTS.find((p) => p.id === c.id), qty: c.qty }));
@@ -64,6 +65,7 @@ export default function App() {
 
   const checkout = () => {
     ensureAudio();
+    setNote(CAT_NOTES[Math.floor(Math.random() * CAT_NOTES.length)]);  /* 盲盒：每次结账换一句 */
     setCartOpen(false);
     setStep(0);
     setPhase('checkout');
@@ -84,7 +86,7 @@ export default function App() {
       )}
 
       {phase === 'checkout' && <CheckoutOverlay step={step} />}
-      {phase === 'receipt' && <Receipt items={items} count={count} total={total} orderNo={orderNo} onReset={reset} />}
+      {phase === 'receipt' && <Receipt items={items} count={count} total={total} orderNo={orderNo} note={note} onReset={reset} />}
 
       <CartSidebar
         open={cartOpen && phase === 'shop'}
