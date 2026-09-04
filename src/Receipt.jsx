@@ -1,6 +1,7 @@
 import Barcode from './Barcode.jsx';
+import { PawStamp } from './data.jsx';
 
-export default function Receipt({ items, count, orderNo, onReset }) {
+export default function Receipt({ items, count, total, orderNo, note, onReset }) {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const dateStr = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
@@ -31,7 +32,7 @@ export default function Receipt({ items, count, orderNo, onReset }) {
               <div className="text-[10.5px] leading-[2.1] text-neutral-600">
                 <div className="flex justify-between"><span>订单时间</span><span className="text-neutral-900">{dateStr} {timeStr}</span></div>
                 <div className="flex justify-between"><span>订单编号</span><span className="text-neutral-900">No. {orderNo}</span></div>
-                <div className="flex justify-between"><span>收银员</span><span className="text-neutral-900">今晚的月亮</span></div>
+                <div className="flex justify-between"><span>收银员</span><span className="text-neutral-900">店长 · 一只猫</span></div>
               </div>
               {D}
 
@@ -41,7 +42,7 @@ export default function Receipt({ items, count, orderNo, onReset }) {
                     <span className="text-neutral-900">
                       {it.name}<span className="text-neutral-400 ml-2">×{it.qty}</span>
                     </span>
-                    <span className="shrink-0">$0.00</span>
+                    <span className="shrink-0">${(it.price * it.qty).toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-neutral-500 mt-1">
@@ -51,19 +52,45 @@ export default function Receipt({ items, count, orderNo, onReset }) {
               {D}
 
               <div className="flex justify-between items-baseline">
+                <span className="text-[11px] tracking-[0.2em] text-neutral-500">小计 SUBTOTAL</span>
+                <span className="text-[13px] text-neutral-500">${total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-baseline mt-2">
+                <span className="text-[11px] tracking-[0.1em] text-neutral-500">店长特批 CAT'S DISCOUNT</span>
+                <span className="text-[13px] text-neutral-500 line-through decoration-1">-${total.toFixed(2)}</span>
+              </div>
+              {D}
+
+              <div className="flex justify-between items-baseline">
                 <span className="text-[13px] font-bold tracking-[0.2em]">合计 TOTAL</span>
                 <span className="text-lg font-bold">$0.00</span>
               </div>
               <div className="text-[10.5px] leading-[2.1] text-neutral-600 mt-2">
-                <div className="flex justify-between"><span>支付方式</span><span className="text-neutral-900">您的宁静 · PAID</span></div>
+                <div className="flex justify-between"><span>支付方式</span><span className="text-neutral-900">店长请客 · TREATED</span></div>
                 <div className="flex justify-between"><span>找零</span><span className="text-neutral-900">$0.00</span></div>
               </div>
               {D}
 
-              <div className="text-center font-serif italic text-[13px] leading-[2.2] text-neutral-700 px-1">
-                世界很喧嚣，<br />
-                但此刻你是宁静的。<br />
-                <span className="text-neutral-500">您的钱包依然满载，一如您的灵魂。</span>
+              <div className="relative">
+                <div className="text-center font-serif italic text-[13px] leading-[2.2] text-neutral-700 px-1">
+                  世界很喧嚣，<br />
+                  但此刻你是宁静的。<br />
+                  <span className="text-neutral-500">您的钱包依然满载，一如您的灵魂。</span>
+                </div>
+
+                {/* 猫爪印章：盖在引言上，暗红印泥 */}
+                <div
+                  className="anim-stamp absolute -top-2 right-0 text-[#a63d2f] opacity-80 select-none"
+                  style={{ animationDelay: '1.6s', mixBlendMode: 'multiply' }}
+                >
+                  <PawStamp size={72} />
+                </div>
+              </div>
+
+              {/* 店长手写便签 */}
+              <div className="anim-note mt-5 mx-1 border border-neutral-200 bg-[#faf9f2] px-5 py-5" style={{ animationDelay: '2.2s' }}>
+                <p className="text-[9px] tracking-[0.35em] text-neutral-400 font-mono">FROM THE CAT'S DESK</p>
+                <p className="mt-2 font-serif italic text-[12.5px] leading-[2] text-neutral-600">{note}</p>
               </div>
               {D}
 
@@ -79,7 +106,7 @@ export default function Receipt({ items, count, orderNo, onReset }) {
           data-testid="re-shop"
           onClick={onReset}
           className="anim-float mt-12 mb-6 px-12 py-3.5 border border-neutral-900 text-neutral-900 text-[11px] tracking-[0.4em] hover:bg-neutral-900 hover:text-white transition-all duration-500"
-          style={{ animationDelay: '2.1s' }}
+          style={{ animationDelay: '2.8s' }}
         >
           重新购物 · SHOP AGAIN
         </button>

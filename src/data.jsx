@@ -6,7 +6,15 @@ export const CHECKOUT_STEPS = [
   '正在清点您的购物车...',
   '正在打包您的宁静...',
   '隔绝外界焦虑...',
-  '支付成功',
+  '店长拿走了您的账单...',
+];
+
+export const CAT_NOTES = [
+  '喵，今天看你很累，这个拥抱给你打折，0元拿走吧。',
+  '今天外面风很大，带走这份宁静吧，算我账上。',
+  '买下了最贵的东西，送给最该被偏爱的小朋友。喵。',
+  '幸福不用买的，拎着它走出这里就好。喵。',
+  '天晚了，早点回家睡觉。这一单，就算我们认识了。喵。',
 ];
 
 const GlyphSilence = () => (
@@ -42,6 +50,7 @@ export const PRODUCTS = [
     name: '深夜11点的10分钟绝对安静',
     en: 'ABSOLUTE SILENCE',
     desc: '隔绝现实的喧嚣与工作群的弹窗。此刻世界属于你。',
+    price: 99,
   },
   {
     id: 2,
@@ -50,6 +59,7 @@ export const PRODUCTS = [
     name: '小怪兽熟睡后的天使滤镜',
     en: 'ANGEL FILTER',
     desc: '提取最柔软的记忆。原谅今天所有的兵荒马乱。',
+    price: 299,
   },
   {
     id: 3,
@@ -58,6 +68,7 @@ export const PRODUCTS = [
     name: '毫无逻辑的偏爱与肯定',
     en: 'BLIND AFFECTION',
     desc: '你今天已经做得很好了，无需向任何人证明什么。',
+    price: 168,
   },
 ];
 
@@ -65,5 +76,18 @@ export const BagIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5.5 8h13l-1.2 12.5H6.7L5.5 8Z" />
     <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+  </svg>
+);
+
+/* 猫爪印章：一个大肉垫 + 四个趾垫，印泥质感 */
+export const PawStamp = ({ size = 120, className = '' }) => (
+  <svg width={size} height={size * 0.95} viewBox="0 0 100 95" className={className} aria-hidden="true">
+    <g fill="currentColor">
+      <ellipse cx="50" cy="66" rx="24" ry="19" />
+      <ellipse cx="22" cy="38" rx="10.5" ry="13" transform="rotate(-18 22 38)" />
+      <ellipse cx="42" cy="24" rx="10.5" ry="13.5" transform="rotate(-6 42 24)" />
+      <ellipse cx="62" cy="24" rx="10.5" ry="13.5" transform="rotate(6 62 24)" />
+      <ellipse cx="80" cy="38" rx="10.5" ry="13" transform="rotate(18 80 38)" />
+    </g>
   </svg>
 );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BagIcon } from './data.jsx';
 
-export default function CartSidebar({ open, items, count, onClose, onInc, onDec, onCheckout }) {
+export default function CartSidebar({ open, items, count, total, onClose, onInc, onDec, onCheckout }) {
   return (
     <React.Fragment>
       <div
@@ -45,7 +45,7 @@ export default function CartSidebar({ open, items, count, onClose, onInc, onDec,
                 <li key={it.id} className="py-8 border-b border-neutral-100 anim-fade">
                   <div className="flex items-baseline justify-between gap-4">
                     <h4 className="text-[15px] font-light text-neutral-900 leading-relaxed">{it.name}</h4>
-                    <span className="font-mono text-sm font-light text-neutral-900 shrink-0">$0.00</span>
+                    <span className="font-mono text-sm font-light text-neutral-900 shrink-0">${(it.price * it.qty).toFixed(2)}</span>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-5">
@@ -64,7 +64,7 @@ export default function CartSidebar({ open, items, count, onClose, onInc, onDec,
         <div className="px-8 py-7 border-t border-neutral-100 shrink-0">
           <div className="flex items-baseline justify-between mb-5">
             <span className="text-[11px] font-mono tracking-[0.3em] text-neutral-400">合计 TOTAL</span>
-            <span className="text-2xl font-extralight">$0.00</span>
+            <span className="text-2xl font-extralight">${total.toFixed(2)}</span>
           </div>
           <button
             data-testid="checkout-btn"
@@ -74,7 +74,7 @@ export default function CartSidebar({ open, items, count, onClose, onInc, onDec,
           >
             去结算 · CHECKOUT
           </button>
-          <p className="mt-4 text-center text-[10px] font-light text-neutral-400 tracking-wider">本店仅支持「宁静」支付</p>
+          <p className="mt-4 text-center text-[10px] font-light text-neutral-400 tracking-wider">支持所有支付方式 · 分期免息</p>
         </div>
       </aside>
     </React.Fragment>

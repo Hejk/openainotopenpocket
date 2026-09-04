@@ -27,7 +27,7 @@ export default function CheckoutOverlay({ step }) {
       </div>
       {last && (
         <p className="anim-fade mt-6 font-mono text-[10px] tracking-[0.35em] text-neutral-500" style={{ animationDelay: '500ms' }}>
-          PAID WITH YOUR CALM · 收款 $0.00
+          THE CAT IS TREATING YOU · 店长请客
         </p>
       )}
     </div>

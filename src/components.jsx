@@ -32,21 +32,21 @@ export function Hero() {
   return (
     <section className="pt-40 pb-24 md:pt-52 md:pb-32 px-8 text-center">
       <p className="anim-fade-up text-[10px] md:text-[11px] font-mono tracking-[0.55em] text-neutral-400" style={{ animationDelay: '100ms' }}>
-        EMOTIONAL GROCERY · EST. 2026
+        EMOTIONAL LUXURY · EST. 2026
       </p>
       <h1 className="anim-fade-up mt-8 font-extralight text-4xl md:text-6xl lg:text-7xl leading-tight tracking-wide" style={{ animationDelay: '250ms' }}>
-        贩卖宁静，<br />不动钱包。
+        贩卖世间最昂贵<br />的奢侈品。
       </h1>
       <p className="anim-fade-up mt-10 text-sm md:text-[15px] font-light text-neutral-500 leading-loose max-w-md mx-auto" style={{ animationDelay: '450ms' }}>
-        掏空钱包这件事，别人家已经做得足够好了。<br />
-        这里不制造焦虑，不兜售欲望。所有体验，一律 <span className="text-neutral-900 font-normal">$0.00</span>。
+        宁静、柔软、无条件的偏爱。<br />
+        世上最稀缺的三样东西，这里明码标价。
       </p>
       <div className="anim-fade-up mt-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-mono tracking-[0.3em] text-neutral-400" style={{ animationDelay: '600ms' }}>
-        <span>FREE SHIPPING</span>
+        <span>PRICES UPON REQUEST</span>
         <span className="text-neutral-300">·</span>
         <span>NO ADS</span>
         <span className="text-neutral-300">·</span>
-        <span className="anim-breathe inline-block" style={{ animationDuration: '4s' }}>$0.00 FOREVER</span>
+        <span className="anim-breathe inline-block" style={{ animationDuration: '4s' }}>WORTH EVERY PENNY</span>
       </div>
       <div className="anim-line mt-16 md:mt-24 mx-auto bg-neutral-200" style={{ height: '1px', width: 'min(560px, 80%)' }} />
     </section>
@@ -74,7 +74,7 @@ function ProductCard({ p, i, onAdd, added }) {
 
       <div className="mt-8 pt-6 border-t border-neutral-100 flex items-baseline justify-between">
         <span className="text-[10px] font-mono tracking-[0.3em] text-neutral-400">PRICE</span>
-        <span className="text-xl font-extralight">$0.00</span>
+        <span className="text-xl font-extralight">${p.price.toFixed(2)}</span>
       </div>
 
       <button
@@ -101,7 +101,7 @@ export function ProductGrid({ onAdd, added }) {
           今日贩售
           <span className="ml-3 font-mono text-[10px] tracking-[0.3em] text-neutral-300">NOW SELLING</span>
         </h2>
-        <span className="font-mono text-[10px] tracking-[0.25em] text-neutral-400 hidden sm:block">共 3 件 · 库存：此刻</span>
+        <span className="font-mono text-[10px] tracking-[0.25em] text-neutral-400 hidden sm:block">共 3 件 · 全球限量 · 售完即止</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {PRODUCTS.map((p, i) => (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { PRODUCTS, CHECKOUT_STEPS } from './data.jsx';
+import { PRODUCTS, CHECKOUT_STEPS, CAT_NOTES } from './data.jsx';
 import { Header, Hero, ProductGrid, Footer } from './components.jsx';
 import CartSidebar from './CartSidebar.jsx';
 import CheckoutOverlay from './CheckoutOverlay.jsx';
@@ -14,9 +14,11 @@ export default function App() {
   const [step, setStep] = useState(0);
   const [added, setAdded] = useState(null);
   const [orderNo] = useState(() => String(Math.floor(10000 + Math.random() * 90000)));
+  const [note, setNote] = useState(CAT_NOTES[0]);
 
   const count = cart.reduce((a, c) => a + c.qty, 0);
   const items = cart.map((c) => ({ ...PRODUCTS.find((p) => p.id === c.id), qty: c.qty }));
+  const total = items.reduce((a, it) => a + it.price * it.qty, 0);
 
   useEffect(() => { window.scrollTo(0, 0); }, [phase]);
 
@@ -61,7 +63,13 @@ export default function App() {
   const inc = (id) => setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c)));
   const dec = (id) => setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: c.qty - 1 } : c)).filter((c) => c.qty > 0));
 
-  const checkout = () => { ensureAudio(); setCartOpen(false); setStep(0); setPhase('checkout'); };
+  const checkout = () => {
+    ensureAudio();
+    setNote(CAT_NOTES[Math.floor(Math.random() * CAT_NOTES.length)]);
+    setCartOpen(false);
+    setStep(0);
+    setPhase('checkout');
+  };
   const reset = () => { setCart([]); setStep(0); setPhase('shop'); };
 
   return (
@@ -78,12 +86,13 @@ export default function App() {
       )}
 
       {phase === 'checkout' && <CheckoutOverlay step={step} />}
-      {phase === 'receipt' && <Receipt items={items} count={count} orderNo={orderNo} onReset={reset} />}
+      {phase === 'receipt' && <Receipt items={items} count={count} total={total} orderNo={orderNo} note={note} onReset={reset} />}
 
       <CartSidebar
         open={cartOpen && phase === 'shop'}
         items={items}
         count={count}
+        total={total}
         onClose={() => setCartOpen(false)}
         onInc={inc}
         onDec={dec}
