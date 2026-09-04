@@ -1,7 +1,7 @@
 import Barcode from './Barcode.jsx';
 import { PawStamp } from './data.jsx';
 
-export default function Receipt({ items, count, total, orderNo, note, onReset }) {
+export default function Receipt({ items, count, total, orderNo, onReset }) {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const dateStr = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
@@ -61,36 +61,34 @@ export default function Receipt({ items, count, total, orderNo, note, onReset })
               </div>
               {D}
 
-              <div className="flex justify-between items-baseline">
-                <span className="text-[13px] font-bold tracking-[0.2em]">合计 TOTAL</span>
-                <span className="text-lg font-bold">$0.00</span>
-              </div>
-              <div className="text-[10.5px] leading-[2.1] text-neutral-600 mt-2">
-                <div className="flex justify-between"><span>支付方式</span><span className="text-neutral-900">店长请客 · TREATED</span></div>
-                <div className="flex justify-between"><span>找零</span><span className="text-neutral-900">$0.00</span></div>
+              <div className="relative">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[13px] font-bold tracking-[0.2em]">合计 TOTAL</span>
+                  <span className="text-lg font-bold">$0.00</span>
+                </div>
+                <div className="text-[10.5px] leading-[2.1] text-neutral-600 mt-2">
+                  <div className="flex justify-between"><span>支付方式</span><span className="text-neutral-900">店长请客 · TREATED</span></div>
+                  <div className="flex justify-between"><span>找零</span><span className="text-neutral-900">$0.00</span></div>
+                </div>
+
+                {/* 猫爪印章：砰地盖在合计行上，暗红印泥 */}
+                <div
+                  className="anim-stamp absolute -top-4 right-6 text-[#a63d2f] opacity-90 select-none pointer-events-none"
+                  style={{ animationDelay: '1.4s', mixBlendMode: 'multiply' }}
+                >
+                  <PawStamp size={64} />
+                </div>
+                {/* 店长手写批注：从爪印下方浮现 */}
+                <p className="anim-note mt-1 text-right font-serif italic text-[11.5px] text-[#a63d2f] opacity-80" style={{ animationDelay: '1.9s' }}>
+                  喵，今天辛苦啦，算我账上！
+                </p>
               </div>
               {D}
 
-              <div className="relative">
-                <div className="text-center font-serif italic text-[13px] leading-[2.2] text-neutral-700 px-1">
-                  世界很喧嚣，<br />
-                  但此刻你是宁静的。<br />
-                  <span className="text-neutral-500">您的钱包依然满载，一如您的灵魂。</span>
-                </div>
-
-                {/* 猫爪印章：盖在引言上，暗红印泥 */}
-                <div
-                  className="anim-stamp absolute -top-2 right-0 text-[#a63d2f] opacity-80 select-none"
-                  style={{ animationDelay: '1.6s', mixBlendMode: 'multiply' }}
-                >
-                  <PawStamp size={72} />
-                </div>
-              </div>
-
-              {/* 店长手写便签 */}
-              <div className="anim-note mt-5 mx-1 border border-neutral-200 bg-[#faf9f2] px-5 py-5" style={{ animationDelay: '2.2s' }}>
-                <p className="text-[9px] tracking-[0.35em] text-neutral-400 font-mono">FROM THE CAT'S DESK</p>
-                <p className="mt-2 font-serif italic text-[12.5px] leading-[2] text-neutral-600">{note}</p>
+              <div className="text-center font-serif italic text-[13px] leading-[2.2] text-neutral-700 px-1">
+                世界很喧嚣，<br />
+                但此刻你是宁静的。<br />
+                <span className="text-neutral-500">您的钱包依然满载，一如您的灵魂。</span>
               </div>
               {D}
 

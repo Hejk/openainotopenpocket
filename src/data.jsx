@@ -79,15 +79,15 @@ export const BagIcon = ({ size = 20 }) => (
   </svg>
 );
 
-/* 猫爪印章：一个大肉垫 + 四个趾垫，印泥质感 */
-export const PawStamp = ({ size = 120, className = '' }) => (
-  <svg width={size} height={size * 0.95} viewBox="0 0 100 95" className={className} aria-hidden="true">
-    <g fill="currentColor">
-      <ellipse cx="50" cy="66" rx="24" ry="19" />
-      <ellipse cx="22" cy="38" rx="10.5" ry="13" transform="rotate(-18 22 38)" />
-      <ellipse cx="42" cy="24" rx="10.5" ry="13.5" transform="rotate(-6 42 24)" />
-      <ellipse cx="62" cy="24" rx="10.5" ry="13.5" transform="rotate(6 62 24)" />
-      <ellipse cx="80" cy="38" rx="10.5" ry="13" transform="rotate(18 80 38)" />
+/* 猫爪印章：心形肉垫 + 四个趾垫，随爪的角度倾斜（印泥质感用暗红） */
+export const PawStamp = ({ size = 64, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" className={className} aria-hidden="true">
+    <g fill="currentColor" transform="rotate(-15 50 50)">
+      <path d="M 50 80 C 25 80, 20 60, 35 50 C 45 43, 55 43, 65 50 C 80 60, 75 80, 50 80 Z" />
+      <ellipse cx="25" cy="40" rx="8" ry="12" transform="rotate(-30 25 40)" />
+      <ellipse cx="40" cy="25" rx="8" ry="12" transform="rotate(-10 40 25)" />
+      <ellipse cx="60" cy="25" rx="8" ry="12" transform="rotate(10 60 25)" />
+      <ellipse cx="75" cy="40" rx="8" ry="12" transform="rotate(30 75 40)" />
     </g>
   </svg>
 );
