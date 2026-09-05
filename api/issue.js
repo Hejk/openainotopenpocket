@@ -14,11 +14,7 @@ const handler = async (req, res) => {
   try {
     const up = await fetch(`${redisUrl}/incr/issued`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${redisToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(['issued']),
+      headers: { Authorization: `Bearer ${redisToken}` },
     });
     if (!up.ok) return res.status(200).json({ ok: false });
     const data = await up.json();
