@@ -1,12 +1,27 @@
+import { useEffect, useRef } from 'react';
 import Barcode from './Barcode.jsx';
 import { PawStamp } from './data.jsx';
 
-export default function Receipt({ items, count, total, orderNo, note, onReset }) {
+export default function Receipt({ items, count, total, orderNo, note, issued, claimed, onReset, onClaim }) {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const dateStr = d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
   const timeStr = pad(d.getHours()) + ':' + pad(d.getMinutes());
   const D = <div className="border-t border-dashed border-neutral-300 my-4" />;
+  const couponRef = useRef(null);
+
+  /* 出票戏剧完成后（爪印 1.4s + 批注 1.9s），把取货联轻轻送到眼前 */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = couponRef.current;
+      if (!el) return;
+      const scroller = el.closest('.overflow-y-auto');
+      if (el.getBoundingClientRect().bottom <= window.innerHeight) return;      /* 已在视野内 */
+      if (scroller && scroller.scrollTop > 60) return;                          /* 用户已自己滚动 */
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 3200);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: 'radial-gradient(circle at 50% 18%, #f6f6f4 0%, #e7e7e4 75%)' }}>
@@ -94,7 +109,40 @@ export default function Receipt({ items, count, total, orderNo, note, onReset })
 
               <Barcode seed={42} />
               <p className="text-center text-[10px] tracking-[0.4em] text-neutral-500 mt-2">谢谢惠顾 · THANK YOU</p>
+              {issued && (
+                <p className="text-center text-[10px] tracking-[0.2em] text-neutral-400 mt-2">
+                  您是第 {issued} 位把宁静带走的人
+                </p>
+              )}
               <p className="text-center text-[9px] tracking-[0.2em] text-neutral-400 mt-2">情绪一经售出 · 概不退换</p>
+
+              {/* ====== 取货联：钉在小票下方的虚线撕票，凭票领取 ====== */}
+              <div ref={couponRef} data-testid="claim-coupon" className="mt-7 pt-5 border-t border-dashed border-neutral-300">
+                <p className="font-mono text-[9px] tracking-[0.45em] text-neutral-400 text-center">取货联 · CLAIM</p>
+                <div className="mt-4 flex flex-col gap-2.5">
+                  {items.map((it) => (
+                    <button
+                      key={it.id}
+                      data-testid={'claim-' + it.id}
+                      onClick={() => onClaim(it.id)}
+                      className={
+                        'flex items-center justify-between px-4 py-3 border text-left transition-all duration-500 ' +
+                        (claimed.includes(it.id)
+                          ? 'border-neutral-200 text-neutral-300 cursor-default'
+                          : 'border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white')
+                      }
+                    >
+                      <span className="text-[11px] tracking-[0.15em]">{it.name}</span>
+                      <span className="font-mono text-[9px] tracking-[0.3em] shrink-0 ml-3">
+                        {claimed.includes(it.id) ? '已领取' : '取货 →'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-4 text-center text-[9px] font-light text-neutral-400 leading-relaxed">
+                  凭本联进入对应体验。领取后小票保留，可随时再次进入。
+                </p>
+              </div>
             </div>
             <div className="zz-bottom" />
           </div>
@@ -103,7 +151,7 @@ export default function Receipt({ items, count, total, orderNo, note, onReset })
         <button
           data-testid="re-shop"
           onClick={onReset}
-          className="anim-float mt-12 mb-6 px-12 py-3.5 border border-neutral-900 text-neutral-900 text-[11px] tracking-[0.4em] hover:bg-neutral-900 hover:text-white transition-all duration-500"
+          className="anim-float mt-10 mb-6 px-12 py-3.5 border border-neutral-900 text-neutral-900 text-[11px] tracking-[0.4em] hover:bg-neutral-900 hover:text-white transition-all duration-500"
           style={{ animationDelay: '2.8s' }}
         >
           重新购物 · SHOP AGAIN

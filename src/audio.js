@@ -65,3 +65,103 @@ export function playDing() {
     osc.stop(t + dur + 0.05);
   });
 }
+
+/* ============ 沉浸式交付：环境声 ============ */
+
+let ambientNodes = null;
+
+function stopAmbient() {
+  if (!ambientNodes) return;
+  const { master } = ambientNodes;
+  const t = master.context.currentTime;
+  master.gain.cancelScheduledValues(t);
+  master.gain.setValueAtTime(master.gain.value, t);
+  master.gain.linearRampToValueAtTime(0, t + 0.6);
+  ambientNodes.stops.forEach((s) => setTimeout(s, 700));
+  ambientNodes = null;
+}
+
+/* 极轻的合成白噪音：像深夜房间里的底噪 */
+function startSilence(ctx, master) {
+  const src = ctx.createBufferSource();
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  src.buffer = buf;
+  src.loop = true;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 450;
+  const g = ctx.createGain();
+  g.gain.value = 0.016;
+  src.connect(lp).connect(g).connect(master);
+  src.start();
+  return [() => src.stop()];
+}
+
+/* 天使滤镜：低沉温暖的持续和弦，极慢呼吸 */
+function startAngel(ctx, master) {
+  const stops = [];
+  [110, 165, 220.5].forEach((f, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.05 + i * 0.017;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.014;
+    lfo.connect(lfoGain).connect(g.gain);
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 3);
+    osc.connect(g).connect(master);
+    osc.start();
+    lfo.start();
+    stops.push(() => { osc.stop(); lfo.stop(); });
+  });
+  return stops;
+}
+
+/* 心跳脉动：与光晕同步的双峰节律 */
+function startHeartbeat(ctx, master) {
+  const stops = [];
+  const beat = () => {
+    if (!ambientNodes || ambientNodes.kind !== 'heartbeat') return;
+    const t = ctx.currentTime;
+    [[0, 0.05], [0.18, 0.028]].forEach(([delay, vol]) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(58, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(40, t + delay + 0.12);
+      const env = ctx.createGain();
+      env.gain.setValueAtTime(0, t + delay);
+      env.gain.linearRampToValueAtTime(vol, t + delay + 0.012);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.32);
+      osc.connect(env).connect(master);
+      osc.start(t + delay);
+      osc.stop(t + delay + 0.4);
+    });
+    setTimeout(beat, 2000);
+  };
+  beat();
+  return stops;
+}
+
+export function startAmbient(kind) {
+  stopAmbient();
+  const ctx = ensureAudio();
+  if (!ctx || ctx.state !== 'running' || !kind) return;
+  const master = ctx.createGain();
+  master.gain.value = 1;
+  master.connect(ctx.destination);
+  const stops =
+    kind === 'silence' ? startSilence(ctx, master) :
+    kind === 'angel' ? startAngel(ctx, master) :
+    kind === 'heartbeat' ? startHeartbeat(ctx, master) : [];
+  ambientNodes = { master, stops, kind };
+}
+
+export function stopAmbientSound() {
+  stopAmbient();
+}

@@ -5,16 +5,20 @@ import { Header, Hero, ProductGrid, Footer } from './components.jsx';
 import CartSidebar from './CartSidebar.jsx';
 import CheckoutOverlay from './CheckoutOverlay.jsx';
 import Receipt from './Receipt.jsx';
+import Immersive from './Immersive.jsx';
 import { ensureAudio, playDing, playPaperFeed } from './audio.js';
 
 export default function App() {
-  const [phase, setPhase] = useState('shop');   // shop | checkout | receipt
+  const [phase, setPhase] = useState('shop');   // shop | checkout | receipt | immersive
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [added, setAdded] = useState(null);
   const [orderNo] = useState(() => String(Math.floor(10000 + Math.random() * 90000)));
   const [note, setNote] = useState(() => CAT_NOTES[Math.floor(Math.random() * CAT_NOTES.length)]);
+  const [claiming, setClaiming] = useState(null);
+  const [claimed, setClaimed] = useState([]);   /* 已领取过的商品 id，用于取货联的「已领取」态 */
+  const [issued, setIssued] = useState(null);
 
   const count = cart.reduce((a, c) => a + c.qty, 0);
   const items = cart.map((c) => ({ ...PRODUCTS.find((p) => p.id === c.id), qty: c.qty }));
@@ -40,11 +44,15 @@ export default function App() {
     return () => clearTimeout(t);
   }, [phase, step]);
 
-  /* 出票瞬间的音效：叮 → 沙沙 */
+  /* 出票瞬间的音效：叮 → 沙沙；同时领取真实发放编号（失败则整行隐藏，不显示假数字） */
   useEffect(() => {
     if (phase !== 'receipt') return;
     playDing();
     const t = setTimeout(playPaperFeed, 350);
+    fetch('/api/issue', { method: 'POST' })
+      .then((r) => r.json())
+      .then((d) => { if (d && d.ok && d.issued) setIssued(d.issued); })
+      .catch(() => {});
     return () => clearTimeout(t);
   }, [phase]);
 
@@ -70,6 +78,11 @@ export default function App() {
     setStep(0);
     setPhase('checkout');
   };
+  const claim = (id) => {
+    setClaiming(id);
+    setClaimed((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setPhase('immersive');
+  };
   const reset = () => { setCart([]); setStep(0); setPhase('shop'); };
 
   return (
@@ -86,7 +99,13 @@ export default function App() {
       )}
 
       {phase === 'checkout' && <CheckoutOverlay step={step} />}
-      {phase === 'receipt' && <Receipt items={items} count={count} total={total} orderNo={orderNo} note={note} onReset={reset} />}
+      {phase === 'receipt' && (
+        <Receipt
+          items={items} count={count} total={total} orderNo={orderNo}
+          note={note} issued={issued} claimed={claimed} onReset={reset} onClaim={claim}
+        />
+      )}
+      {phase === 'immersive' && <Immersive productId={claiming} onExit={() => setPhase('receipt')} />}
 
       <CartSidebar
         open={cartOpen && phase === 'shop'}

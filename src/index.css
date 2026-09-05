@@ -38,6 +38,15 @@ body {
 }
 @keyframes noteIn   { from{opacity:0;transform:translateY(20px) rotate(-1deg)} to{opacity:1;transform:translateY(0) rotate(-1deg)} }
 
+/* ---------- 沉浸页光晕：比商品呼吸更慢，像睡着的人 ---------- */
+@keyframes breatheSlow   { 0%,100%{transform:scale(1);opacity:.55} 50%{transform:scale(1.12);opacity:1} }
+@keyframes breatheSlower { 0%,100%{transform:scale(1);opacity:.4}  50%{transform:scale(1.15);opacity:1} }
+@keyframes haloPulse     { 0%,100%{transform:scale(1);opacity:.35} 8%{transform:scale(1.09);opacity:.95} 16%{transform:scale(1.02);opacity:.5} 24%{transform:scale(1.06);opacity:.75} 60%{transform:scale(1);opacity:.4} }
+
+.anim-breathe-slow   { animation:breatheSlow 7s ease-in-out infinite; }
+.anim-breathe-slower { animation:breatheSlower 9s ease-in-out infinite; }
+.anim-halo-pulse     { animation:haloPulse 2s ease-in-out infinite; }
+
 .anim-fade-up  { animation:fadeUp 1.1s cubic-bezier(.22,1,.36,1) both; }
 .anim-fade     { animation:fadeIn 1.4s ease both; }
 .anim-line     { animation:growLine 1.6s cubic-bezier(.22,1,.36,1) .8s both; transform-origin:center; }

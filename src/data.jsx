@@ -91,6 +91,34 @@ export const BagIcon = ({ size = 20 }) => (
   </svg>
 );
 
+/* 沉浸式交付：三件商品 = 三种全屏体验。时长是真实的——广告说 10 分钟，就是 10 分钟 */
+export const EXPERIENCES = {
+  1: {
+    sound: 'silence',
+    duration: 600,
+    bg: '#000000',
+    halo: 'radial-gradient(circle, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 42%, transparent 68%)',
+    haloClass: 'anim-breathe-slow',
+    ending: '十分钟到了。世界没有变，但你休息过了。这就够了。',
+  },
+  2: {
+    sound: 'angel',
+    duration: 300,
+    bg: '#0c0a07',
+    halo: 'radial-gradient(circle, rgba(255,186,120,0.15) 0%, rgba(255,166,90,0.05) 42%, transparent 68%)',
+    haloClass: 'anim-breathe-slower',
+    ending: '小怪兽还在睡。今天已被原谅，明天请轻一点来。',
+  },
+  3: {
+    sound: 'heartbeat',
+    duration: 300,
+    bg: '#070505',
+    halo: 'radial-gradient(circle, rgba(166,61,47,0.22) 0%, rgba(166,61,47,0.07) 42%, transparent 66%)',
+    haloClass: 'anim-halo-pulse',
+    ending: '你被偏爱着。毫无逻辑，也不需要逻辑。',
+  },
+};
+
 /* 猫爪印章：心形肉垫 + 四个趾垫，随爪的角度倾斜（印泥质感用暗红） */
 export const PawStamp = ({ size = 64, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" className={className} aria-hidden="true">
